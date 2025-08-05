@@ -1,0 +1,49 @@
+from google.colab import files
+uploaded = files.upload()
+import re
+import pandas as pd
+filename = list(uploaded.keys())[0]
+with open(filename, 'r') as f:
+    lines = f.readlines()
+data = []
+pattern = re.compile(
+    r"INSERT INTO\s+server_metrics\s*\([^)]*\)\s*VALUES\s*\((.+)\);",
+    re.IGNORECASE
+)
+for line in lines:
+    match = pattern.search(line)
+    if match:
+        parts = [p.strip() for p in values_str.split(',')]
+        parts[0] = parts[0].strip("'")  # timestamp
+        parts[1] = parts[1].strip("'")  # host
+        numeric_parts = [float(x) for x in parts[2:]]
+        row = [parts[0], parts[1]] + numeric_parts
+        data.append(row)
+print("Rows extracted:", len(data))
+columns = ["timestamp", "host", "cpu_usage", "mem_usage", "disk_io", "net_in", "net_out"]
+df = pd.DataFrame(data, columns=columns)
+df['timestamp'] = pd.to_datetime(df['timestamp'])
+numeric_cols = ["cpu_usage", "mem_usage", "disk_io", "net_in", "net_out"]
+for col in numeric_cols:
+    df[col] = pd.to_numeric(df[col])
+df.head()
+columns = ["timestamp", "host", "cpu_usage", "mem_usage", "disk_io", "net_in", "net_out"]
+df = pd.DataFrame(data, columns=columns)
+df['timestamp'] = pd.to_datetime(df['timestamp'])
+numeric_cols = ["cpu_usage", "mem_usage", "disk_io", "net_in", "net_out"]
+for col in numeric_cols:
+    df[col] = pd.to_numeric(df[col])
+df.head()
+print(df.describe())
+import matplotlib.pyplot as plt
+plt.figure(figsize=(10, 5))
+plt.bar(df['host'], df['cpu_usage'])
+plt.xlabel('Host')
+plt.ylabel('CPU Usage (%)')
+plt.title('CPU Usage by Host')
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
+anomalies = df[df['cpu_usage'] > 90]
+print("Anomalous entries based on CPU usage > 90%:")
+print(anomalies[['timestamp', 'host', 'cpu_usage']])
