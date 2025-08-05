@@ -19,10 +19,3 @@ Create a DataFrame.
 Display summaries and plots.
 Print CPU usage anomalies.
 View and analyze the output directly in the notebook.
-Example
-Example SQL line processed:
-sql
-Copy
-Edit
-INSERT INTO server_metrics (timestamp, host, cpu_usage, mem_usage, disk_io, net_in, net_out) 
-VALUES ('2025-06-01 00:00:00', 'host01', 73.82, 3841.09, 391.34, 45.15, 7.69);
